@@ -3,37 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Category;
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Auth\Events\Validated;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Requests\CreateBookRequest;
+use App\Http\Requests\UpdateBookRequest;
 
 class BookController extends Controller
 {
-   public function index(Request $request)
-{
-    $query = Book::with('category');
-    if ($request->filled('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%');
-    }
-
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-
-    $allowedSorts = ['created_at', 'price', 'name'];
-
-    $sort = in_array($request->query('sort'), $allowedSorts, true)
-        ? $request->query('sort')
-        : 'created_at';
-
-    $order = $request->query('order', 'desc');
-
-    return $query
-        ->orderBy($sort, $order)
-        ->paginate(10);
-}
-
-    public function create(Request $request): array
+    public function index(Request $request)
     {
-        $data = $request->all();
+        $query = Book::with('category');
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $allowedSorts = ['created_at', 'price', 'name'];
+
+        $sort = in_array($request->query('sort'), $allowedSorts, true)
+            ? $request->query('sort')
+            : 'created_at';
+
+        $order = $request->query('order', 'desc');
+
+        return $query
+            ->orderBy($sort, $order)
+            ->paginate(10);
+    }
+
+    public function create(CreateBookRequest $request): JsonResponse
+    {
+        $data = $request->validated();
 
         $book = Book::create([
             'name'        => $data['name'],
@@ -44,10 +52,11 @@ class BookController extends Controller
             'category_id' => $data['category_id'],
         ]);
 
-        return [
-            'message' => 'created',
-            'data'    => $book
-        ];
+        return response()->json([
+            'success' => true,
+            'message' => 'Tạo sách thành công',
+            'data' => $book
+        ], 201);
     }
 
     public function show($id)
@@ -65,33 +74,25 @@ class BookController extends Controller
         ];
     }
 
-    public function update(Request $request, $id): array
+    public function update(UpdateBookRequest $request, $id)
     {
         $book = Book::find($id);
 
         if (!$book) {
-            return [
-                'message' => 'Not found'
-            ];
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy sách'
+            ], 404);
         }
 
-        $data = $request->all();
+        $book->update($request->validated());
 
-        $book->update([
-            'name'        => $data['name'] ?? $book->name,
-            'description' => $data['description'] ?? $book->description,
-            'price'       => $data['price'] ?? $book->price,
-            'quantity'    => $data['quantity'] ?? $book->quantity,
-            'image'       => $data['image'] ?? $book->image,
-            'category_id' => $data['category_id'] ?? $book->category_id,
-        ]);
-
-        return [
-            'message' => 'updated',
-            'data'    => $book
-        ];
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật sách thành công',
+            'data' => $book
+        ], 200);
     }
-
     public function delete($id): array
     {
         $book = Book::find($id);
