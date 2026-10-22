@@ -12,7 +12,7 @@ class BookJoinController extends Controller
     {
         $books = DB::table('books')
             ->join('categories', 'books.category_id', '=', 'categories.id')
-            ->select('books.id','books.name','books.price','books.quantity','categories.name as category_name')
+            ->select('books.id', 'books.name', 'books.price', 'books.quantity', 'categories.name as category_name')
             ->get();
 
         return response()->json($books);
@@ -22,7 +22,7 @@ class BookJoinController extends Controller
     {
         $books = DB::table('books')
             ->leftJoin('categories', 'books.category_id', '=', 'categories.id')
-            ->select('books.id','books.name','books.price','books.quantity','categories.name as category_name')
+            ->select('books.id', 'books.name', 'books.price', 'books.quantity', 'categories.name as category_name')
             ->get();
 
         return response()->json($books);
@@ -32,7 +32,7 @@ class BookJoinController extends Controller
     {
         $query = DB::table('books')
             ->join('categories', 'books.category_id', '=', 'categories.id')
-            ->select('books.id','books.name','books.price','books.quantity','categories.name as category_name');
+            ->select('books.id', 'books.name', 'books.price', 'books.quantity', 'categories.name as category_name');
 
         if ($request->filled('search')) {
             $query->where('books.name', 'like', '%' . $request->search . '%');
@@ -46,6 +46,8 @@ class BookJoinController extends Controller
             $query->orderBy('books.price', 'asc');
         } elseif ($request->sort == 'desc') {
             $query->orderBy('books.price', 'desc');
+        } elseif ($request->sort == 'category') {
+            $query->orderBy('categories.name', 'asc');
         } else {
             $query->orderBy('books.created_at', 'desc');
         }
