@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\Api\BookJoinController;
 use App\Models\Category;
 use App\Models\Book;
 use App\Models\User;
@@ -15,6 +16,10 @@ Route::get('/health', function () {
         'message' => 'API is running'
     ]);
 });
+
+Route::get('/books/inner-join', [BookJoinController::class, 'innerJoin']);
+Route::get('/books/left-join', [BookJoinController::class, 'leftJoin']);
+Route::get('/books/join-filter', [BookJoinController::class, 'joinFilter']);
 
 Route::get('/books', [BookController::class, 'index']);
 Route::post('/books', [BookController::class, 'create']);

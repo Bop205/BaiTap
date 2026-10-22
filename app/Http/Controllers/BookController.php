@@ -37,9 +37,9 @@ class BookController extends Controller
         return $query
             ->orderBy($sort, $order)
             ->paginate(10);
-    }
-
-    public function create(CreateBookRequest $request): JsonResponse
+}
+}
+    function create(CreateBookRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -59,7 +59,7 @@ class BookController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    function show($id)
     {
         $book = Book::with('category')->find($id);
 
@@ -74,7 +74,7 @@ class BookController extends Controller
         ];
     }
 
-    public function update(UpdateBookRequest $request, $id)
+    function update(UpdateBookRequest $request, $id)
     {
         $book = Book::find($id);
 
@@ -93,7 +93,7 @@ class BookController extends Controller
             'data' => $book
         ], 200);
     }
-    public function delete($id): array
+    function delete($id): array
     {
         $book = Book::find($id);
 
@@ -109,4 +109,3 @@ class BookController extends Controller
             'message' => 'deleted'
         ];
     }
-}
