@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\Api\BookJoinController;
+use App\Http\Controllers\Api\AuthController;
 use App\Models\Category;
 use App\Models\Book;
 use App\Models\User;
@@ -17,15 +18,25 @@ Route::get('/health', function () {
     ]);
 });
 
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
 Route::get('/books/inner-join', [BookJoinController::class, 'innerJoin']);
 Route::get('/books/left-join', [BookJoinController::class, 'leftJoin']);
 Route::get('/books/join-filter', [BookJoinController::class, 'joinFilter']);
 
 Route::get('/books', [BookController::class, 'index']);
-Route::post('/books', [BookController::class, 'create']);
 Route::get('/books/{id}', [BookController::class, 'show']);
 Route::put('/books/{id}', [BookController::class, 'update']);
-Route::delete('/books/{id}', [BookController::class, 'delete']);
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::post('/books', [BookController::class, 'create']);
+    Route::delete('/books/{id}', [BookController::class, 'delete']);
+});
 
 Route::get('/test-category/{id}', function ($id) {
     return Category::with('books')->findOrFail($id);
