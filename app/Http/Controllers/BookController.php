@@ -18,6 +18,7 @@ class BookController extends Controller
     public function index(Request $request)
     {
         $query = Book::with('category');
+
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
@@ -37,9 +38,9 @@ class BookController extends Controller
         return $query
             ->orderBy($sort, $order)
             ->paginate(10);
-}
-}
-    function create(CreateBookRequest $request): JsonResponse
+    }
+
+    public function create(CreateBookRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -59,22 +60,22 @@ class BookController extends Controller
         ], 201);
     }
 
-    function show($id)
+    public function show($id)
     {
         $book = Book::with('category')->find($id);
 
         if (!$book) {
-            return [
+            return response()->json([
                 'message' => 'Not found'
-            ];
+            ], 404);
         }
 
-        return [
+        return response()->json([
             'data' => $book
-        ];
+        ]);
     }
 
-    function update(UpdateBookRequest $request, $id)
+    public function update(UpdateBookRequest $request, $id)
     {
         $book = Book::find($id);
 
@@ -93,19 +94,21 @@ class BookController extends Controller
             'data' => $book
         ], 200);
     }
-    function delete($id): array
+
+    public function delete($id): JsonResponse
     {
         $book = Book::find($id);
 
         if (!$book) {
-            return [
+            return response()->json([
                 'message' => 'Not found'
-            ];
+            ], 404);
         }
 
         $book->delete();
 
-        return [
+        return response()->json([
             'message' => 'deleted'
-        ];
+        ], 200);
     }
+}
